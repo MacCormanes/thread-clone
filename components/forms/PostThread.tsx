@@ -19,6 +19,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { updateUser } from "@/lib/actions/user.actions";
 import { ThreadValidation } from "@/lib/validations/thread";
 import { Input } from "../shadcn/ui/input";
+import { createThread } from "@/lib/actions/thread.actions";
 
 type Props = {
   user: {
@@ -44,7 +45,16 @@ function PostThread({ userId }: { userId: string }) {
     },
   });
 
-  const onSubmit = () => {};
+  const onSubmit = async (values: z.infer<typeof ThreadValidation>) => {
+    await createThread({
+      text: values.thread,
+      author: userId,
+      communityId: null,
+      path: pathname,
+    })
+
+    router.push('/')
+  };
 
   return (
     <Form {...form}>
@@ -56,21 +66,18 @@ function PostThread({ userId }: { userId: string }) {
           control={form.control}
           name="thread"
           render={({ field }) => (
-            <FormItem className="flex flex-col gap-3 w-full">
+            <FormItem className="flex flex-col w-full gap-3">
               <FormLabel className="mt-10 text-base-semibold text-light-2">
                 Content
               </FormLabel>
-              <FormControl className="no-focus border border-dark-4 bg-dark-3 text-light-1">
+              <FormControl className="border no-focus border-dark-4 bg-dark-3 text-light-1">
                 <Textarea rows={15} {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="bg-primary-500 hover:bg-primary-500/80 text-white hover:text-white/80">Post Thread</Button>
+        <Button type="submit" className="text-white bg-primary-500 hover:bg-primary-500/80 hover:text-white/80">Post Thread</Button>
       </form>
     </Form>
   );

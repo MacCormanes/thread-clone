@@ -1,24 +1,29 @@
-"use client"
+"use client";
 
 import { sidebarLinks } from "@/constants";
-import { SignOutButton, SignedIn } from "@clerk/clerk-react";
+import { SignOutButton, SignedIn, useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 function LeftSideBar() {
-  const router = useRouter()
-  const pathname = usePathname()
+  const router = useRouter();
+  const pathname = usePathname();
+  const { userId } = useAuth();
   return (
     <section className="custom-scrollbar leftsidebar">
-      <div className="flex w-full flex-1 flex-col gap-6 px-6">
+      <div className="flex flex-col flex-1 w-full gap-6 px-6">
         {sidebarLinks.map((link) => {
-          const isActive = (pathname.includes(link.route) && link.route.length > 1 || pathname === link.route)
+          const isActive =
+            (pathname.includes(link.route) && link.route.length > 1) ||
+            pathname === link.route;
+
+          if (link.route === "/profile") link.route = `${link.route}/${userId}`;
           return (
             <Link
               href={link.route}
               key={link.label}
-              className={`leftsidebar_link ${isActive && 'bg-primary-500'}`}
+              className={`leftsidebar_link ${isActive && "bg-primary-500"}`}
             >
               <Image
                 src={link.imgURL}
@@ -33,15 +38,21 @@ function LeftSideBar() {
         })}
       </div>
 
-      <div className="mt-10 px-6">
-      <SignedIn>
-            <SignOutButton signOutCallback={() => router.push('/sign-in')}>
-              <div className="flex cursor-pointer">
-                <Image src='/assets/logout.svg' alt='logout' width={24} height={24} className='' />
-                <p className="text-light-2 max-lg:hidden gap-4 p-4">Logout</p>
-              </div>
-            </SignOutButton>
-          </SignedIn>
+      <div className="px-6 mt-10">
+        <SignedIn>
+          <SignOutButton signOutCallback={() => router.push("/sign-in")}>
+            <div className="flex cursor-pointer">
+              <Image
+                src="/assets/logout.svg"
+                alt="logout"
+                width={24}
+                height={24}
+                className=""
+              />
+              <p className="gap-4 p-4 text-light-2 max-lg:hidden">Logout</p>
+            </div>
+          </SignOutButton>
+        </SignedIn>
       </div>
     </section>
   );
